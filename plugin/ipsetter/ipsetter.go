@@ -32,12 +32,23 @@ func (w *resultingResponseWriter) WriteMsg(res *dns.Msg) error {
 }
 
 func (l *IPSetter) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (int, error) {
+	m := false
+	for _, q := range r.Question {
+		if l.matches(q.Name) {
+			m = true
+			break
+		}
+	}
+	if !m {
+		return plugin.NextOrFailure(l.Name(), l.Next, ctx, w, r)
+	}
+
 	rw := &resultingResponseWriter{ResponseWriter: w, msg: r}
 	res, err := plugin.NextOrFailure(l.Name(), l.Next, ctx, rw, r)
 
 	if err == nil {
 		for _, rr := range rw.msg.Answer {
-			if l.matches(rr.Header().Name) && rr.Header().Rrtype == dns.TypeA {
+			if rr.Header().Rrtype == dns.TypeA {
 				rec := rr.(*dns.A)
 				err = ipset.Add(l.SetName, &ipset.Entry{IP: rec.A, Replace: true})
 				if err != nil {

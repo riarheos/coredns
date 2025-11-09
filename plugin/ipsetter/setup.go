@@ -42,6 +42,10 @@ func ipsetterParse(c *caddy.Controller) (string, []domainMatcher, error) {
 					exact:  false,
 					domain: v[1:] + ".",
 				})
+				result = append(result, domainMatcher{
+					exact:  true,
+					domain: v[2:] + ".",
+				})
 			} else {
 				result = append(result, domainMatcher{
 					exact:  true,
