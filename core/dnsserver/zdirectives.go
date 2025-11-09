@@ -30,6 +30,7 @@ var Directives = []string{
 	"prometheus",
 	"errors",
 	"log",
+	"ipsetter",
 	"dnstap",
 	"local",
 	"dns64",
